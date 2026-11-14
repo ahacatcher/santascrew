@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Secret Santa Draw</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#0c2a2c; --bg2:#14434a; --cream:#fffaf0; --ink:#25322f; --muted:#6b7a76;
+    --red:#c8372d; --red-d:#a62a21; --gold:#f2c14e; --green:#1f6f54; --line:#eadfc8;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{
+    font-family:'Nunito',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    color:var(--ink);
+    background:radial-gradient(1200px 700px at 50% -10%,var(--bg2),var(--bg1) 70%) fixed;
+    min-height:100vh;
+  }
+  #snow{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
+  .wrap{position:relative;z-index:2;max-width:640px;margin:0 auto;padding:28px 16px 60px}
+  header{text-align:center;color:#fff;margin-bottom:18px}
+  .logo{font-size:44px;line-height:1}
+  h1{font-family:'Mountains of Christmas',Georgia,serif;font-size:44px;margin:4px 0 2px;color:var(--gold);letter-spacing:.5px}
+  .sub{margin:0;color:#cfe6e0;font-size:15px}
+  .card{
+    background:var(--cream);border-radius:18px;padding:22px 22px 20px;margin:0 0 14px;
+    box-shadow:0 10px 30px rgba(0,0,0,.25);border:1px solid var(--line)
+  }
+  .card h2{margin:0 0 8px;font-size:20px}
+  .card p{margin:0 0 12px;line-height:1.5}
+  .muted{color:var(--muted);font-size:14px}
+  label{display:block;font-weight:800;margin:4px 0 6px}
+  select,input[type=password]{
+    width:100%;font:inherit;padding:12px;border-radius:12px;border:2px solid var(--line);background:#fff;color:var(--ink)
+  }
+  select:focus,input:focus,textarea:focus{outline:none;border-color:var(--green)}
+  textarea{width:100%;font:inherit;padding:12px;border-radius:12px;border:2px solid var(--line);background:#fff;color:var(--ink)}
+  .btn{
+    font:inherit;font-weight:800;border:0;border-radius:12px;padding:13px 20px;cursor:pointer;
+    background:var(--red);color:#fff;box-shadow:0 3px 0 var(--red-d);transition:transform .08s
+  }
+  .btn:hover{transform:translateY(-1px)}
+  .btn:active{transform:translateY(2px);box-shadow:none}
+  .btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+  .btn.big{width:100%;font-size:19px;padding:16px}
+  .btn.green{background:var(--green);box-shadow:0 3px 0 #15503d}
+  .btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line);box-shadow:none}
+  .btn.small{padding:6px 12px;font-size:13px;border-radius:9px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+  .stack{display:grid;gap:10px;margin-top:14px}
+  .msg{color:var(--green);font-weight:800;font-size:14px}
+  .err{background:#fde8e6;border:1px solid #f2b8b3;color:#8a1f17;padding:10px 12px;border-radius:10px;margin:0 0 12px;font-weight:600}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-weight:600;font-size:14px}
+  .chip.gold{background:#fff3d1;border-color:#ecd08a}
+  .bar{height:12px;background:#efe6d2;border-radius:99px;overflow:hidden;margin:6px 0 4px}
+  .bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--green),#3aa57d);border-radius:99px;transition:width .5s}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:6px 4px}
+  td{padding:9px 4px;border-top:1px solid var(--line);vertical-align:middle}
+  td.arrow{color:var(--muted);width:24px;text-align:center}
+  .center{text-align:center}
+  .bag{font-size:92px;line-height:1;margin:6px 0 10px;display:inline-block}
+  .shake{animation:shake .55s ease-in-out infinite}
+  @keyframes shake{
+    0%,100%{transform:rotate(0) translateY(0)}
+    20%{transform:rotate(-10deg) translateY(-6px)}
+    40%{transform:rotate(9deg) translateY(0)}
+    60%{transform:rotate(-7deg) translateY(-4px)}
+    80%{transform:rotate(6deg) translateY(0)}
+  }
+  .reveal-label{font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-size:13px;margin:0}
+  .reveal-name{
+    font-family:'Mountains of Christmas',Georgia,serif;font-size:54px;line-height:1.05;margin:10px 0 8px;
+    color:var(--red);animation:pop .9s cubic-bezier(.2,1.4,.4,1) both;word-break:break-word
+  }
+  @keyframes pop{0%{transform:scale(.2) rotate(-6deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+  .gift{font-size:46px;animation:pop 1s .2s cubic-bezier(.2,1.4,.4,1) both}
+  .loading{text-align:center;font-weight:800;font-size:18px;padding:12px}
+  .footer{text-align:center;color:#a9cbc3;font-size:13px;margin-top:18px}
+  .footer a{color:#a9cbc3}
+  @media (prefers-reduced-motion:reduce){ .shake,.reveal-name,.gift{animation:none} }
+  @media (max-width:420px){ h1{font-size:38px} .reveal-name{font-size:44px} }
+</style>
+</head>
+<body>
+<canvas id="snow" aria-hidden="true"></canvas>
+<main class="wrap">
+  <header>
+    <div class="logo" aria-hidden="true">🦌🛷</div>
+    <h1>Secret Santa</h1>
+    <p class="sub">One bag. One pull. No putting names back!</p>
+  </header>
+  <div id="app" aria-live="polite"></div>
+  <p class="footer">Your draw is saved the instant you pull, so reloading won't give you a new name. 🤫</p>
+  <p class="footer"><a href="#" id="org-link">Organizer</a></p>
+</main>
+
+<script>
+(function(){
+'use strict';
+
+var $ = function(s){ return document.querySelector(s); };
+var esc = function(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+};
+var sleep = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
+function store(k, v){
+  try {
+    if (v === undefined) return JSON.parse(localStorage.getItem(k));
+    if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v));
+  } catch (e) {}
+  return null;
+}
+function sstore(k, v){
+  try {
+    if (v === undefined) return sessionStorage.getItem(k);
+    if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v);
+  } catch (e) {}
+  return null;
+}
+
+async function api(path, body){
+  var opt = body ? { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) } : { cache:'no-store' };
+  var r = await fetch(path, opt), j = {};
+  try { j = await r.json(); } catch (e) {}
+  if (!r.ok) { var e = new Error(j.error || 'Something went wrong. Please try again.'); e.status = r.status; throw e; }
+  return j;
+}
+
+/* ---------- state ---------- */
+var S = {
+  people:[], left:0, loaded:false, loadErr:'',
+  me: store('santa-me'), phase:null, meId:null, selWho:'', busy:false,
+  revealed:false, gotName:'', error:'',
+  view:'play', pass:'', adminData:null, adminErr:'', showMatches:false,
+  confirmReset:null, copyFallback:null, msg:'', dirty:false
+};
+
+function card(inner){ return '<section class="card">' + inner + '</section>'; }
+function chip(t, cls){ return '<span class="chip ' + (cls || '') + '">' + esc(t) + '</span>'; }
+function nameOf(id){
+  var p = S.people.find(function(x){ return x.id === id; });
+  return p ? p.name : '';
+}
+
+/* ---------- play view ---------- */
+function playView(){
+  if (!S.loaded) {
+    if (S.loadErr) return card('<h2>Can\'t open the bag</h2><p>' + esc(S.loadErr) + '</p><button class="btn" data-act="retry">Try again</button>');
+    return card('<div class="loading">❄️ Loading the bag…</div>');
+  }
+  if (S.phase === 'drawing') {
+    return card('<div class="center"><div class="bag shake" aria-hidden="true">🎅🎁</div><h2>Shaking the bag…</h2><p class="muted">Reaching in. No peeking!</p></div>');
+  }
+  if (S.me) {
+    if (S.revealed && S.gotName) {
+      return card(
+        '<div class="center"><p class="reveal-label">Your Secret Santa person is</p>' +
+        '<div class="reveal-name">' + esc(S.gotName) + '</div>' +
+        '<div class="gift" aria-hidden="true">🎁</div>' +
+        '<p class="muted" style="margin-top:12px">Shhh, keep it secret! 🤫</p>' +
+        '<button class="btn ghost small" data-act="hide">Hide my name</button></div>');
+    }
+    var who = nameOf(S.me.id);
+    return card('<div class="center"><div class="bag" aria-hidden="true">🎅</div><h2>You\'ve already drawn' + (who ? ', ' + esc(who) : '') + '!</h2>' +
+      (S.error ? '<div class="err">' + esc(S.error) + '</div>' : '') +
+      '<p class="muted">Your name is safe. Make sure nobody is looking over your shoulder.</p>' +
+      '<button class="btn green" data-act="show">Show me my person again</button></div>');
+  }
+  var waiting = S.people.filter(function(p){ return !p.drawn; });
+  if (!waiting.length) {
+    return card('<div class="center"><div class="bag" aria-hidden="true">🎄</div><h2>Everyone has drawn!</h2><p class="muted">The bag is empty. If you drew on a different phone or browser and need to see your name again, ask the organizer.</p></div>');
+  }
+  if (S.phase === 'confirm' && S.meId) {
+    return card(
+      (S.error ? '<div class="err">' + esc(S.error) + '</div>' : '') +
+      '<div class="center"><div class="bag" aria-hidden="true">🎅</div><h2>Hi, ' + esc(nameOf(S.meId)) + '! 👋</h2>' +
+      '<p>Ready to pull your Secret Santa from the bag? Once you pull, it\'s final.</p></div>' +
+      '<div class="stack"><button class="btn big" data-act="draw">Draw my name 🎁</button>' +
+      '<button class="btn ghost" data-act="back">That\'s not me</button></div>');
+  }
+  var opts = waiting.map(function(p){
+    return '<option value="' + esc(p.id) + '"' + (S.selWho === p.id ? ' selected' : '') + '>' + esc(p.name) + '</option>';
+  }).join('');
+  return card(
+    '<h2>Who are you?</h2>' +
+    '<p class="muted">Pick your own name so you can\'t pull yourself.</p>' +
+    '<label for="who">My name is</label>' +
+    '<select id="who"><option value="">Choose your name…</option>' + opts + '</select>' +
+    '<div class="stack"><button class="btn big" id="btn-me" data-act="me"' + (S.selWho ? '' : ' disabled') + '>That\'s me</button></div>' +
+    '<p class="muted" style="margin-top:14px">' + S.left + ' name' + (S.left === 1 ? '' : 's') + ' left in the bag. Names leave this list once they\'ve drawn. Don\'t see yours? You may have already drawn. Ask the organizer.</p>');
+}
+
+/* ---------- organizer view ---------- */
+function orgView(){
+  var d = S.adminData;
+  if (!d) {
+    return card('<h2>Organizer</h2><p class="muted">Enter the organizer passcode.</p>' +
+      (S.adminErr ? '<div class="err">' + esc(S.adminErr) + '</div>' : '') +
+      '<label for="pass">Passcode</label><input id="pass" type="password" autocomplete="current-password">' +
+      '<div class="stack"><button class="btn" data-act="login">Open organizer view</button>' +
+      '<button class="btn ghost" data-act="leave">Back to the draw</button></div>');
+  }
+  var done = d.pulls.length, total = d.total, pct = total ? Math.round(done / total * 100) : 0;
+  var h = card('<h2>Progress</h2>' +
+    '<div><b>' + done + ' of ' + total + '</b> have drawn</div>' +
+    '<div class="bar"><i style="width:' + pct + '%"></i></div>' +
+    '<h2 style="margin-top:16px;font-size:16px">Hasn\'t pulled yet (' + d.notDrawn.length + ')</h2>' +
+    (d.notDrawn.length ? '<div class="chips">' + d.notDrawn.map(function(p){ return chip(p.name, 'gold'); }).join('') + '</div>' : '<p class="muted">Everyone has pulled. 🎉</p>') +
+    '<h2 style="margin-top:16px;font-size:16px">Still in the bag (' + d.inBag.length + ')</h2>' +
+    (d.inBag.length ? '<div class="chips">' + d.inBag.map(function(p){ return chip(p.name); }).join('') + '</div>' : '<p class="muted">The bag is empty.</p>') +
+    '<div class="row"><button class="btn ghost small" data-act="refresh">Refresh</button><span class="msg">' + esc(S.msg) + '</span></div>');
+
+  var m = '<h2>Who has whom</h2>';
+  if (!S.showMatches) {
+    m += '<p class="muted">' + done + ' match' + (done === 1 ? '' : 'es') + ' so far. Hidden by default so you don\'t spoil your own surprise if you\'re playing.</p>' +
+      '<button class="btn" data-act="showMatches">Show matches</button>';
+  } else {
+    if (!d.pulls.length) m += '<p class="muted">Nobody has pulled yet.</p>';
+    else {
+      m += '<table><thead><tr><th>Gift giver</th><th></th><th>Pulled</th><th></th></tr></thead><tbody>' +
+        d.pulls.map(function(p){
+          var sure = S.confirmReset === p.drawerId;
+          return '<tr><td>' + esc(p.drawerName) + '</td><td class="arrow">→</td><td><b>' + esc(p.gotName) + '</b></td>' +
+            '<td style="text-align:right"><button class="btn small ghost" data-act="reset-one" data-id="' + esc(p.drawerId) + '">' + (sure ? 'Sure? Tap again' : 'Reset') + '</button></td></tr>';
+        }).join('') + '</tbody></table>';
+    }
+    m += '<div class="row"><button class="btn green small" data-act="copy">Copy list</button><button class="btn ghost small" data-act="hideMatches">Hide matches</button></div>';
+    if (S.copyFallback) m += '<p class="muted" style="margin-top:10px">Copy didn\'t work here. Select and copy this:</p><textarea readonly rows="6">' + esc(S.copyFallback) + '</textarea>';
+    m += '<p class="muted" style="margin-top:10px">“Reset” puts one person\'s pulled name back in the bag and lets them draw again, for fixing a wrong-name mix-up.</p>';
+  }
+  h += card(m);
+  h += card('<h2>Start over</h2><p class="muted">Clears every draw and puts all the names back in the bag.</p>' +
+    '<button class="btn ghost" data-act="reset-all">' + (S.confirmReset === 'ALL' ? 'Really reset everything? Tap again' : 'Reset everything') + '</button>');
+  h += '<div class="row" style="justify-content:center"><button class="btn ghost small" style="color:#fff;border-color:rgba(255,255,255,.4)" data-act="leave">Back to the draw</button></div>';
+  return h;
+}
+
+function render(){
+  $('#app').innerHTML = S.view === 'org' ? orgView() : playView();
+}
+function rerender(){
+  var a = document.activeElement;
+  if (a && (a.id === 'who' || a.id === 'pass')) { S.dirty = true; return; }
+  render();
+}
+document.addEventListener('focusout', function(e){
+  if (S.dirty && (e.target.id === 'who' || e.target.id === 'pass')) { S.dirty = false; setTimeout(render, 0); }
+});
+
+/* ---------- actions ---------- */
+async function loadState(){
+  try {
+    var j = await api('/api/state');
+    S.people = j.people; S.left = j.left; S.loaded = true; S.loadErr = '';
+    if (S.me) {
+      var p = S.people.find(function(x){ return x.id === S.me.id; });
+      if (!p || !p.drawn) { S.me = null; store('santa-me', null); S.revealed = false; S.gotName = ''; }
+    }
+  } catch (e) {
+    if (!S.loaded) S.loadErr = e.status ? e.message : 'Can\'t reach the bag. Check your connection.';
+  }
+  if (S.view === 'play' && S.phase !== 'drawing') rerender();
+}
+
+async function doDraw(){
+  if (S.busy) return;
+  S.busy = true; S.error = ''; S.phase = 'drawing'; render(); snowBurst(2600, 2);
+  var t0 = Date.now(), res = null, err = null;
+  try { res = await api('/api/draw', { id: S.meId }); } catch (e) { err = e; }
+  await sleep(Math.max(0, 2600 - (Date.now() - t0)));
+  S.busy = false;
+  if (err) { S.phase = 'confirm'; S.error = err.message; render(); loadState(); return; }
+  S.me = { id: S.meId, token: res.token }; store('santa-me', S.me);
+  S.gotName = res.gotName; S.revealed = true; S.phase = null; S.meId = null; S.selWho = '';
+  render(); snowBurst(6500, 7); loadState();
+}
+
+async function showAgain(){
+  try {
+    var j = await api('/api/mine', { id: S.me.id, token: S.me.token });
+    S.gotName = j.gotName; S.revealed = true; S.error = ''; render(); snowBurst(4500, 5);
+  } catch (e) { S.error = e.message; render(); }
+}
+
+async function adminCall(action, extra){
+  var j = await api('/api/admin', Object.assign({ passcode: S.pass, action: action }, extra || {}));
+  S.adminData = j; return j;
+}
+async function login(){
+  var el = $('#pass'); S.pass = el ? el.value : S.pass;
+  S.adminErr = '';
+  try { await adminCall('view'); sstore('santa-pass', S.pass); }
+  catch (e) { S.adminErr = e.message; S.adminData = null; }
+  render();
+}
+async function refresh(){
+  try { await adminCall('view'); S.msg = ''; } catch (e) { S.msg = e.message; }
+  render();
+}
+async function copyMatches(){
+  var d = S.adminData;
+  var text = d.pulls.map(function(p){ return p.drawerName + ' → ' + p.gotName; }).join('\n');
+  if (d.notDrawn.length) text += '\n\nHasn\'t pulled yet: ' + d.notDrawn.map(function(p){ return p.name; }).join(', ');
+  try { await navigator.clipboard.writeText(text); S.copyFallback = null; S.msg = 'Copied ✓'; }
+  catch (e) { S.copyFallback = text; }
+  render();
+}
+
+var actions = {
+  retry: function(){ S.loadErr = ''; render(); loadState(); },
+  me: function(){ if (!S.selWho) return; S.meId = S.selWho; S.phase = 'confirm'; S.error = ''; render(); },
+  back: function(){ S.phase = null; S.meId = null; S.error = ''; render(); },
+  draw: doDraw,
+  show: showAgain,
+  hide: function(){ S.revealed = false; S.gotName = ''; render(); },
+  login: login,
+  leave: function(){ S.view = 'play'; render(); loadState(); },
+  refresh: refresh,
+  showMatches: function(){ S.showMatches = true; render(); },
+  hideMatches: function(){ S.showMatches = false; S.copyFallback = null; render(); },
+  copy: copyMatches,
+  'reset-one': async function(b){
+    var id = b.getAttribute('data-id');
+    if (S.confirmReset !== id) { S.confirmReset = id; render(); return; }
+    S.confirmReset = null;
+    try { await adminCall('reset-one', { id: id }); } catch (e) { S.msg = e.message; }
+    render();
+  },
+  'reset-all': async function(){
+    if (S.confirmReset !== 'ALL') { S.confirmReset = 'ALL'; render(); return; }
+    S.confirmReset = null;
+    try { await adminCall('reset-all'); S.msg = 'Everything reset ✓'; } catch (e) { S.msg = e.message; }
+    render();
+  }
+};
+
+$('#app').addEventListener('click', function(e){
+  var b = e.target.closest('[data-act]'); if (!b) return;
+  var fn = actions[b.getAttribute('data-act')]; if (fn) fn(b);
+});
+$('#app').addEventListener('change', function(e){
+  if (e.target.id === 'who') {
+    S.selWho = e.target.value;
+    var btn = $('#btn-me'); if (btn) btn.disabled = !S.selWho;
+  }
+});
+$('#app').addEventListener('keydown', function(e){
+  if (e.target.id === 'pass' && e.key === 'Enter') login();
+});
+$('#org-link').addEventListener('click', function(e){
+  e.preventDefault();
+  S.view = 'org'; S.adminErr = '';
+  var saved = sstore('santa-pass');
+  if (saved && !S.adminData) { S.pass = saved; render(); refresh(); return; }
+  render();
+});
+
+/* ---------- snow ---------- */
+var cv = $('#snow'), ctx = cv.getContext('2d');
+var flakes = [], burst = { until: 0, rate: 0 }, W = 0, H = 0;
+var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+function resize(){
+  var dpr = window.devicePixelRatio || 1;
+  W = window.innerWidth; H = window.innerHeight;
+  cv.width = W * dpr; cv.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', resize); resize();
+function spawn(){
+  flakes.push({ x: Math.random() * W, y: -10, r: 1 + Math.random() * 3.4,
+    vy: 0.7 + Math.random() * 1.8, vx: -0.4 + Math.random() * 0.8,
+    ph: Math.random() * 6.28, a: 0.55 + Math.random() * 0.45 });
+}
+function snowBurst(ms, rate){
+  if (reduce) { ms = Math.min(ms, 1500); rate = Math.min(rate, 1); }
+  burst.until = performance.now() + ms; burst.rate = rate;
+}
+function loop(t){
+  ctx.clearRect(0, 0, W, H);
+  var n = t < burst.until ? burst.rate : (!reduce && Math.random() < 0.1 ? 1 : 0);
+  for (var i = 0; i < n; i++) spawn();
+  ctx.fillStyle = '#fff';
+  for (var j = flakes.length - 1; j >= 0; j--) {
+    var f = flakes[j];
+    f.ph += 0.03; f.y += f.vy; f.x += f.vx + Math.sin(f.ph) * 0.5;
+    if (f.y > H + 12) { flakes.splice(j, 1); continue; }
+    ctx.globalAlpha = f.a;
+    ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 6.2832); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ---------- go ---------- */
+render();
+loadState();
+setInterval(function(){
+  if (document.hidden) return;
+  if (S.view === 'play' && !S.busy) loadState();
+  else if (S.view === 'org' && S.adminData) { adminCall('view').then(function(){ rerender(); }).catch(function(){}); }
+}, 15000);
+})();
+</script>
+</body>
+</html>

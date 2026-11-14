@@ -1,0 +1,9 @@
+{
+  "name": "secret-santa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Secret Santa draw: shared bag, no sign-in",
+  "dependencies": {
+    "@upstash/redis": "^1.34.0"
+  }
+}
