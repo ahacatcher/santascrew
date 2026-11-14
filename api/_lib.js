@@ -10,7 +10,8 @@ const PEOPLE = [
   { id: 'lakenya',  name: 'LaKenya' },
   { id: 'kawanna',  name: 'Kawanna' },
   { id: 'floria',   name: 'Floria' },
-  { id: 'sheldon',  name: 'Sheldon' }
+  { id: 'sheldon',  name: 'Sheldon' },
+  { id: 'kimberley',  name: 'Kimberley' }
 ];
 
 const PULLS_KEY = 'santa:pulls';   // hash: drawerId -> { gotId, token, at }
